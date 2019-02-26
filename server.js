@@ -5,6 +5,11 @@ var express    = require('express');
 var app        = express();      
 var bodyParser = require('body-parser');
 
+var mongoose   = require('mongoose');
+mongoose.connect('mongodb+srv://ApplicationConnection:0OEEFqnFlC4z3mh2@jazzmusic-1gmv1.mongodb.net/test?retryWrites=true'); 
+
+var Address = require('./modules/address');
+
 // configure app to use bodyParser(), this will let us get the data from a POST
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
