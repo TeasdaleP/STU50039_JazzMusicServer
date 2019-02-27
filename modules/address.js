@@ -1,13 +1,12 @@
-// Adress schema model 
+// Address schema model 
 
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-var AddressSchema   = new Schema({
-    reference: string,
-    line1: string,
-    line2: string,
-    postcode: string
+var AddressSchema = new Schema({
+    line1: String,
+    line2: String,
+    postcode: String
 });
 
 module.exports = mongoose.model('Address', AddressSchema);

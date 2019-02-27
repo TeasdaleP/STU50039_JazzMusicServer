@@ -3,7 +3,7 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-var ArtistSchema   = new Schema({
+var ArtistSchema = new Schema({
     reference: string,
     name: string,
     genre: string,
