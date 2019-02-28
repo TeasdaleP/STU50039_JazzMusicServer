@@ -1,13 +1,27 @@
-// Artist schema model 
+// - music format enum
+var MusicFormat = {
+    CD = "cd",
+    Vinyl = "vinyl"
+}
 
+// - artist schema 
 var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
+var Schema = mongoose.Schema; 
 
 var ArtistSchema = new Schema({
-    reference: string,
-    name: string,
-    genre: string,
-    album: []
-});
-
+    name: String,
+    description: String,
+    genre: String,
+    album: [{
+        title: String,
+        description: String,
+        release: Date,
+        format: MusicFormat, 
+        cost: Number,
+        stock: Number
+    }],
+    reference: String
+}) 
+ 
 module.exports = mongoose.model('Artist', ArtistSchema);
+
