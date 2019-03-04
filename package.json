@@ -1,9 +1,16 @@
 {
-    "name": "node-api",
+    "name": "JazzMusicServer",
+    "version": "1.0.0",
+    "description": "The Jazz Music Restful API",
     "main": "server.js",
+    "scripts": {
+        "test": "no test specified"
+    },
+    "keywords": [],
+    "author": "Phillip Teasdale - STU50039",
     "dependencies": {
-        "express": "~4.0.0",
-        "mongoose": "~3.6.13",
+        "express": "^4.15.12",
+        "mysql": "^2.13.0",
         "body-parser": "~1.0.1"
     }
 }

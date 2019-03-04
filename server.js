@@ -1,150 +1,92 @@
-// =============================================================================
-// BASE SETUP
-var express = require('express');
-var app = express();
-var bodyParser = require('body-parser');
+const express = require('express');
+const app = express();
+const mysql = require('mysql');
+const bodyParser = require('body-parser');
 
-var mongoose = require('mongoose');
-mongoose.connect('mongodb://ApplicationConnection:0OEEFqnFlC4z3mh2@jazzmusic-shard-00-00-1gmv1.mongodb.net:27017,jazzmusic-shard-00-01-1gmv1.mongodb.net:27017,jazzmusic-shard-00-02-1gmv1.mongodb.net:27017/test?ssl=true&replicaSet=JazzMusic-shard-0&authSource=admin&retryWrites=true')
-
-var Artist = require('./modules/artist');
-var Customer = require('./modules/customer');
-
-app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
 
-var port = process.env.PORT || 8080;
+const database = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: 'W3bs1t3_Pa$$w0rd',
+    database: 'jazzmusic'
+})
 
-// =============================================================================
-// ROUTES FOR OUR API
-var router = express.Router();
+database.connect();
 
-router.use(function (req, res, next) {
-    console.log('Request has been made successfully');
-    next();
+app.get('/', function (req, res) {
+    return res.send({ error: true, message: 'Success. Its worked as expected.' })
+})
+
+//-- Artist Routes
+app.get('/artist', function (req, res) {
+    database.query('SELECT * FROM artist', function (error, results, fields) {
+        if (error) throw error;
+        return res.send({ error: false, data: results, message: 'All Artists' })
+    })
+})
+
+app.post('/artist', function (req, res) {
+    let artist = [
+        req.body.ArtistName,
+        req.body.Genre,
+        req.body.AristsAlbum
+    ];
+
+    if (!artist) {
+        return res.status(400).send({ error: true, message: 'Please provide an artist.' })
+    }
+
+    database.query('INSERT INTO artist (ArtistsName, Genre, ArtistsAlbum) VALUES', artist, function (error, results, fields) {
+        if (error) throw error;
+        return res.send({error: false, data: results, message: 'Artist Added Successfully'})
+    })
+})
+
+app.get('/artist/:id', function (req, res) {
+    let artist_id = req.params.id;
+    database.query('SELECT * FROM artist where id=?', artist_id, function (error, results, fields) {
+        if (error) throw error;
+        return res.send({ error: false, data: results[0], message: 'Artist' });
+    });
 });
 
-router.get('/', function (req, res) {
-    res.json({ message: 'Success. Its worked as expected' });
+//-- Album Routes
+app.get('/album', function (req, res) {
+    database.query('SELECT * FROM album', function (error, results, fields) {
+        if (error) throw error;
+        return res.send({ error: false, data: results, message: 'All Albums' })
+    })
+})
+
+app.post('/album', function (req, res) {
+    let album = [
+        req.body.AlbumName,
+        req.body.ReleaseDate,
+        req.body.AristsAlbum
+    ];
+
+    if (!artist) {
+        return res.status(400).send({ error: true, message: 'Please provide an album.' })
+    }
+
+    database.query('INSERT INTO album (ArtistsName, Genre, ArtistsAlbum) VALUES (' + album + ')', function (error, results, fields) {
+        if (error) throw error;
+        return res.send({error: false, data: results, message: 'Album Added Successfully'})
+    })
+})
+
+app.get('/album/:id', function (req, res) {
+    let artist_id = req.params.id;
+    database.query('SELECT * FROM album where id=?', artist_id, function (error, results, fields) {
+        if (error) throw error;
+        return res.send({ error: false, data: results[0], message: 'Album' });
+    });
 });
 
-// =============================================================================
-// ARTIST GENERAL
-router.route('/artist')
-
-    // create artist and album
-    .post(function (req, res) {
-
-        var artist = new Artist();
-
-        artist.name = req.body.name;
-        artist.description = req.body.description;
-        artist.genre = req.body.genre;
-        artist.album = [
-            artist.album.title = req.body.album.title,
-            artist.album.description = req.body.album.description,
-            artist.album.release = req.body.album.release,
-            artist.album.format = req.body.album.format,
-            artist.album.cost = req.body.album.cost,
-            artist.album.stock  = req.body.album.stock
-        ]
-        artist.reference = req.body.reference;
-
-        artist.save(function (err) {
-            if (err)
-                res.send(err);
-            res.json({ message: 'Artist added!' });
-        });
-    })
-
-    // get all artists
-    .get(function (req, res) {
-        Artist.find(function (err, artist) {
-            if (err)
-                res.send(err);
-
-            res.json(artist);
-        });
-    });
-
-// =============================================================================
-// ARTIST SPECIFIC
-router.route('/artist/:artist_id')
-
-    // specific artist
-    .get(function (req, res) {
-        Artist.findById(req.params.artist_id, function (err, artist) {
-            if (err)
-                res.send(err);
-            res.json(artist);
-        });
-    })
-
-// =============================================================================
-// CUSTOMER GENERAL
-router.route('/customer')
-
-    // create customer 
-    .post(function (req, res) {
-
-        var customer = new Customer();
-
-        customer.title = req.body.title;
-        customer.firstname = req.body.firstname;
-        customer.surname = req.body.surname;
-        customer.dob = req.body.dob;
-        customer.email = req.body.email;
-        customer.telephone = req.body.telephone;
-        customer.address = [
-            customer.address.line1 = req.body.address.line1,
-            customer.address.line2 = req.body.address.line2,
-            customer.address.postcode = req.body.address.postcode
-        ]
-        customer.order = [
-            customer.order.qty = req.body.order.qty,
-            customer.order.album = req.body.order.album,
-            customer.order.format = req.body.order.format,
-            customer.order.delivery = [
-                customer.order.delivery.expectedDelivery = req.body.order.delivery.expectedDelivery,
-                customer.order.delivery.courier = req.body.order.delivery.courier,
-                customer.order.delivery.tracking = req.body.order.delivery.tracking,
-            ],
-        ]
-        customer.reference = req.body.reference;
-
-        customer.save(function (err) {
-            if (err)
-                res.send(err);
-            res.json({ message: 'Customer added!' });
-        });
-    })
-
-    // get all customers
-    .get(function (req, res) {
-        Customer.find(function (err, customer) {
-            if (err)
-                res.send(err);
-
-            res.json(customer);
-        });
-    });
-
-// =============================================================================
-// CUSTOMER SPECIFIC
-router.route('/customer/:customer_id')
-
-    // specific artist
-    .get(function (req, res) {
-        Customer.findById(req.params.customer_id, function (err, customer) {
-            if (err)
-                res.send(err);
-            res.json(customer);
-        });
-    })
-
-// =============================================================================
-// START THE SERVER
-app.use('/api', router);
-
-app.listen(port);
-console.log('Requests available on port ' + port);
+app.listen(8080, function () {
+    console.log('Application is running on port 8080.')
+})
