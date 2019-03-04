@@ -10,47 +10,80 @@ app.use(bodyParser.urlencoded({
 
 const database = mysql.createConnection({
     host: 'localhost',
-    user: 'websiteuser',
+    user: 'root',
     password: 'W3bs1t3_Pa$$w0rd',
-    database: 'JazzMusic'
+    database: 'jazzmusic'
 })
 
 database.connect();
-
-//var Artist = require('model/artist.js');
 
 app.get('/', function (req, res) {
     return res.send({ error: true, message: 'Success. Its worked as expected.' })
 })
 
-app.get('/artists', function (req, res) {
-    database.query('SELECT * FROM Artists', function (error, results, fields) {
+//-- Artist Routes
+app.get('/artist', function (req, res) {
+    database.query('SELECT * FROM artist', function (error, results, fields) {
         if (error) throw error;
         return res.send({ error: false, data: results, message: 'All Artists' })
     })
 })
 
-app.post('/artists', function (req, res) {
+app.post('/artist', function (req, res) {
     let artist = [
-        req.body.nameofelement,
-        req.body.otherelement
+        req.body.ArtistName,
+        req.body.Genre,
+        req.body.AristsAlbum
     ];
 
     if (!artist) {
         return res.status(400).send({ error: true, message: 'Please provide an artist.' })
     }
 
-    database.query('INSERT INTO Artists SET ? ', { artist: artist }, function (error, results, fields) {
+    database.query('INSERT INTO artist (ArtistsName, Genre, ArtistsAlbum) VALUES', artist, function (error, results, fields) {
         if (error) throw error;
         return res.send({error: false, data: results, message: 'Artist Added Successfully'})
     })
 })
 
-app.get('/artists/:id', function (req, res) {
+app.get('/artist/:id', function (req, res) {
     let artist_id = req.params.id;
-    database.query('SELECT * FROM Artists where id=?', artist_id, function (error, results, fields) {
+    database.query('SELECT * FROM artist where id=?', artist_id, function (error, results, fields) {
         if (error) throw error;
         return res.send({ error: false, data: results[0], message: 'Artist' });
+    });
+});
+
+//-- Album Routes
+app.get('/album', function (req, res) {
+    database.query('SELECT * FROM album', function (error, results, fields) {
+        if (error) throw error;
+        return res.send({ error: false, data: results, message: 'All Albums' })
+    })
+})
+
+app.post('/album', function (req, res) {
+    let album = [
+        req.body.AlbumName,
+        req.body.ReleaseDate,
+        req.body.AristsAlbum
+    ];
+
+    if (!artist) {
+        return res.status(400).send({ error: true, message: 'Please provide an album.' })
+    }
+
+    database.query('INSERT INTO album (ArtistsName, Genre, ArtistsAlbum) VALUES (' + album + ')', function (error, results, fields) {
+        if (error) throw error;
+        return res.send({error: false, data: results, message: 'Album Added Successfully'})
+    })
+})
+
+app.get('/album/:id', function (req, res) {
+    let artist_id = req.params.id;
+    database.query('SELECT * FROM album where id=?', artist_id, function (error, results, fields) {
+        if (error) throw error;
+        return res.send({ error: false, data: results[0], message: 'Album' });
     });
 });
 
